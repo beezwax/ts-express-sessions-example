@@ -9,6 +9,9 @@ import createError, { type HttpError } from "http-errors";
 import session from "express-session";
 import logger from "morgan";
 import dotenv from "dotenv";
+import indexRouter from "./routes/index";
+import usersRouter from "./routes/users";
+import sessionsRouter from "./routes/sessions";
 
 dotenv.config({
   path: path.join(
@@ -20,10 +23,6 @@ dotenv.config({
   ),
 });
 
-import indexRouter from "./routes/index";
-import usersRouter from "./routes/users";
-import sessionsRouter from "./routes/sessions";
-
 const app = express();
 
 // view engine setup
@@ -34,10 +33,13 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.set("trust proxy", 1); // trust first proxy
-invariant(process.env.SESSION_SALT);
+invariant(
+  process.env.APPLICATION_SALT,
+  "Expected APPLICATION_SALT environment variable",
+);
 app.use(
   session({
-    secret: process.env.SESSION_SALT,
+    secret: process.env.APPLICATION_SALT,
     name: "sessionId",
   }),
 );

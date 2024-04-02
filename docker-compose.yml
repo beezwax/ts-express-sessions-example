@@ -1,14 +1,4 @@
 services:
-  # web:
-  #   build: .
-  #   volumes:
-  #     - .:/app
-  #     - node_modules_volume:/app/node_modules
-  #   ports:
-  #     - "127.0.0.1:3000:3000"
-  #   depends_on:
-  #     - mongo
-
   mongo:
     image: mongo
     restart: always

@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import { MongoRepository } from "@/repositories/mongo";
 
 export interface User {
@@ -15,7 +16,8 @@ class UserRepository extends MongoRepository {
     const user = await this.findByUsername(username);
     if (user === null) return null;
 
-    return user.password === password ? user : null;
+    const passwordsMatch = await bcrypt.compare(password, user.password);
+    return passwordsMatch ? user : null;
   }
 
   async findByUsername(username: string): Promise<User | null> {
@@ -28,25 +30,14 @@ class UserRepository extends MongoRepository {
     password: string,
     email: string,
   ): Promise<void> {
+    const hashedPassword = await bcrypt.hash(password, 10);
     const db = await this.db();
     await db
       .collection<Partial<User>>("users")
-      .insertOne({ username, password, email });
+      .insertOne({ username, password: hashedPassword, email });
   }
 }
 
 const users = new UserRepository();
-
-// create dummy user if needed
-// if (users.findByUsername("demo") === null) {
-//   users
-//     .create("demo", "demo", "demo@demo.demo")
-//     .then(() => {
-//       console.log("User created");
-//     })
-//     .catch((err) => {
-//       throw err;
-//     });
-// }
 
 export default users;

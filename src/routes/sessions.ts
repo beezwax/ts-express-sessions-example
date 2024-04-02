@@ -14,17 +14,38 @@ declare module "express-session" {
   }
 }
 
+interface SignInUserResultSuccess {
+  success: true;
+  user: User;
+}
+
+interface SignInUserResultFailure {
+  success: false;
+  error: string;
+}
+
+const signInUser = async ({
+  username,
+  password,
+}: SignInFormParams): Promise<
+  SignInUserResultSuccess | SignInUserResultFailure
+> => {
+  const user = await users.findByCredentials(username, password);
+  if (user === null) return { success: false, error: "Invalid credentials" };
+
+  return { success: true, user };
+};
+
 router.post("/", function (req, res, next) {
   const { username, password } = req.body as SignInFormParams;
 
-  users
-    .findByCredentials(username, password)
-    .then((user) => {
-      if (user === null) {
-        res.render("index", { error: "Invalid credentials" });
-      } else {
-        req.session.user = user;
+  signInUser({ username, password })
+    .then((result) => {
+      if (result.success) {
+        req.session.user = result.user;
         res.redirect("/secret");
+      } else {
+        res.render("index", { error: result.error });
       }
     })
     .catch((err) => {
