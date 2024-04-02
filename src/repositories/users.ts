@@ -1,45 +1,52 @@
+import { MongoRepository } from "@/repositories/mongo";
+
 export interface User {
-  id: number;
+  _id: string;
   username: string;
   password: string;
   email: string;
 }
 
-class UserRepository {
-  #id: number;
-  users: User[];
-
-  constructor() {
-    this.#id = 0;
-    this.users = [];
-  }
-
-  findByCredentials(username: string, password: string): User | null {
-    const user = this.findByUsername(username);
+class UserRepository extends MongoRepository {
+  async findByCredentials(
+    username: string,
+    password: string,
+  ): Promise<User | null> {
+    const user = await this.findByUsername(username);
     if (user === null) return null;
 
     return user.password === password ? user : null;
   }
 
-  findByUsername(username: string): User | null {
-    return this.users.find((u) => u.username === username) ?? null;
+  async findByUsername(username: string): Promise<User | null> {
+    const db = await this.db();
+    return await db.collection("users").findOne<User>({ username });
   }
 
-  create(username: string, password: string, email: string): void {
-    this.users.push({ id: this.#getId(), username, password, email });
-  }
-
-  #getId(): number {
-    this.#id += 1;
-    return this.#id;
+  async create(
+    username: string,
+    password: string,
+    email: string,
+  ): Promise<void> {
+    const db = await this.db();
+    await db
+      .collection<Partial<User>>("users")
+      .insertOne({ username, password, email });
   }
 }
 
 const users = new UserRepository();
 
 // create dummy user if needed
-if (users.findByUsername("demo") === null) {
-  users.create("demo", "demo", "demo@demo.demo");
-}
+// if (users.findByUsername("demo") === null) {
+//   users
+//     .create("demo", "demo", "demo@demo.demo")
+//     .then(() => {
+//       console.log("User created");
+//     })
+//     .catch((err) => {
+//       throw err;
+//     });
+// }
 
 export default users;

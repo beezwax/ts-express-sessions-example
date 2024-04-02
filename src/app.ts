@@ -10,10 +10,6 @@ import session from "express-session";
 import logger from "morgan";
 import dotenv from "dotenv";
 
-import indexRouter from "./routes/index";
-import usersRouter from "./routes/users";
-import sessionsRouter from "./routes/sessions";
-
 dotenv.config({
   path: path.join(
     __dirname,
@@ -24,7 +20,9 @@ dotenv.config({
   ),
 });
 
-invariant(process.env.SESSION_SALT);
+import indexRouter from "./routes/index";
+import usersRouter from "./routes/users";
+import sessionsRouter from "./routes/sessions";
 
 const app = express();
 
@@ -36,6 +34,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.set("trust proxy", 1); // trust first proxy
+invariant(process.env.SESSION_SALT);
 app.use(
   session({
     secret: process.env.SESSION_SALT,
