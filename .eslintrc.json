@@ -11,5 +11,5 @@
     "project": "./tsconfig.json"
   },
   "rules": {},
-  "ignorePatterns": ["dist/**", "jest.config.js"]
+  "ignorePatterns": ["dist/**", "jest.config.js", "*.hbs"]
 }

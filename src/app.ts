@@ -1,16 +1,18 @@
 import path from "path";
+import invariant from "tiny-invariant";
 import express, {
   type Request,
   type Response,
   type NextFunction,
 } from "express";
 import createError, { type HttpError } from "http-errors";
-import cookieParser from "cookie-parser";
+import session from "express-session";
 import logger from "morgan";
 import dotenv from "dotenv";
 
 import indexRouter from "./routes/index";
 import usersRouter from "./routes/users";
+import sessionsRouter from "./routes/sessions";
 
 dotenv.config({
   path: path.join(
@@ -22,6 +24,8 @@ dotenv.config({
   ),
 });
 
+invariant(process.env.SESSION_SALT);
+
 const app = express();
 
 // view engine setup
@@ -31,11 +35,18 @@ app.set("view engine", "hbs");
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.set("trust proxy", 1); // trust first proxy
+app.use(
+  session({
+    secret: process.env.SESSION_SALT,
+    name: "sessionId",
+  }),
+);
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/sessions", sessionsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req: Request, res: Response, next: NextFunction) {

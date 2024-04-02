@@ -1,13 +1,16 @@
-<h1>Sign In</h1>
+<h1>Create new account</h1>
 
-<form action="/sessions" method="POST">
+<form action="/users" method="POST">
   <label for="username">Username</label>
   <input required name="username" id="username" />
 
   <label for="password">Password</label>
   <input required type="password" name="password" id="password" />
 
-  <button>Sign in</button>
+  <label for="email">Email</label>
+  <input required type="email" name="email" id="email" />
+
+  <button>Create</button>
 </form>
 
 {{#if error}}
@@ -15,5 +18,5 @@
 {{/if}}
 
 <p>
-  <a href="/users/new">Create an account</a>
+  <a href="/">Back</a>
 </p>
